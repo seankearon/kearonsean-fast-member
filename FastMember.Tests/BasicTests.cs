@@ -159,7 +159,7 @@ namespace FastMember.Tests
             var now = DateTime.Now;
 
             object obj = new FieldsOnStruct();
-            
+
             var access = TypeAccessor.Create(typeof(FieldsOnStruct));
 
             access[obj, "A"] = 123;
@@ -221,7 +221,7 @@ namespace FastMember.Tests
 
         public class HasDefaultCtor { }
         public class HasNoDefaultCtor { public HasNoDefaultCtor(string s) { } }
-        public abstract class IsAbstract { }   
+        public abstract class IsAbstract { }
 
         [Test]
         public void TestCtor()
@@ -235,7 +235,7 @@ namespace FastMember.Tests
             Assert.AreNotEqual("DynamicAccessor", accessor.GetType().Name);
             Assert.AreNotEqual("DelegateAccessor", accessor.GetType().Name);
 
-            accessor = TypeAccessor.Create(typeof (HasDefaultCtor));
+            accessor = TypeAccessor.Create(typeof(HasDefaultCtor));
             Assert.IsTrue(accessor.CreateNewSupported);
             object obj = accessor.CreateNew();
             Assert.IsInstanceOf(typeof(HasDefaultCtor), obj);
@@ -249,7 +249,7 @@ namespace FastMember.Tests
         public void TestHasGetterNoSetter()
         {
             var obj = new HasGetterNoSetter();
-            var acc = TypeAccessor.Create(typeof (HasGetterNoSetter));
+            var acc = TypeAccessor.Create(typeof(HasGetterNoSetter));
             Assert.AreEqual(5, acc[obj, "Foo"]);
         }
         public class HasGetterPrivateSetter
@@ -264,6 +264,34 @@ namespace FastMember.Tests
             var acc = TypeAccessor.Create(typeof(HasGetterPrivateSetter));
             Assert.AreEqual(5, acc[obj, "Foo"]);
         }
-        
+
+        [Test]
+        public void CachesPropertyNamesOnClass()
+        {
+            var a = TypeAccessor.Create(typeof(PropsOnClass));
+            CollectionAssert.AreEquivalent(new[] { "A", "B", "C", "D" }, a.PropertyNames);
+        }
+
+        [Test]
+        public void CachesFieldNamesOnClass()
+        {
+            var a = TypeAccessor.Create(typeof(FieldsOnClass));
+            CollectionAssert.AreEquivalent(new[] { "A", "B", "C", "D" }, a.FieldNames);
+        }
+
+        [Test]
+        public void CachesPropertyNamesOnStruct()
+        {
+            var a = TypeAccessor.Create(typeof(PropsOnStruct));
+            CollectionAssert.AreEquivalent(new[] { "A", "B", "C", "D" }, a.PropertyNames);
+        }
+
+        [Test]
+        public void CachesFieldNamesOnStruct()
+        {
+            var a = TypeAccessor.Create(typeof(FieldsOnStruct));
+            CollectionAssert.AreEquivalent(new[] { "A", "B", "C", "D" }, a.FieldNames);
+        }
+
     }
 }

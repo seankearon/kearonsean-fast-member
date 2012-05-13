@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
@@ -199,6 +200,12 @@ namespace FastMember
             while (type.IsNestedPublic) type = type.DeclaringType;
             return type.IsPublic;
         }
+
+        private string[] propertyNames, fieldNames;
+
+        public IEnumerable<string> PropertyNames { get { return propertyNames; } }
+        public IEnumerable<string> FieldNames { get { return fieldNames; } }
+
         static TypeAccessor CreateNew(Type type)
         {
 #if !NO_DYNAMIC
@@ -276,7 +283,20 @@ namespace FastMember
                 tb.DefineMethodOverride(body, baseMethod);
             }
 
-            return (TypeAccessor)Activator.CreateInstance(tb.CreateType());
+            TypeAccessor accessor = (TypeAccessor) Activator.CreateInstance(tb.CreateType());
+            accessor.propertyNames = GetNames(props);
+            accessor.fieldNames = GetNames(fields);
+            return accessor;
+        }
+
+        private static string[] GetNames(IList<MemberInfo> members)
+        {
+            var result = new string[members.Count];
+            for (int i = 0; i < members.Count; i++)
+            {
+                result[i] = members[i].Name;
+            }
+            return result;
         }
 
         private static void Cast(ILGenerator il, Type type, LocalBuilder addr)
